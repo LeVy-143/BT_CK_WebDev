@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quản Lý Chi Tiêu</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🐱 Quản Lý Chi Tiêu Hằng Ngày</h1>
+    <div class="form-group">
+      <input type="text" id="tenKhoanChi" placeholder="Tên khoản chi (VD: Ăn trưa)" />
+      <input type="number" id="soTien" placeholder="Số tiền (VD: 35000)" />
+      <input type="date" id="ngayChi" />
+      <button onclick="themChiTieu()">Thêm</button>
+    </div>
+    <div class="summary">
+      <strong>Tổng chi tiêu: </strong><span id="tongChi">0</span> VND
+    </div>
+    <ul id="danhSach"></ul>
+  </div>
+  <script>
+    let danhSachChi = JSON.parse(localStorage.getItem("chiTieu")) || [];
+
+    function capNhatTongChi() {
+      const tong = danhSachChi.reduce((t, item) => t + item.tien, 0);
+      document.getElementById("tongChi").innerText = tong.toLocaleString();
+    }
+
+    function hienThiDanhSach() {
+      const ul = document.getElementById("danhSach");
+      ul.innerHTML = "";
+      danhSachChi
+        .slice()
+        .reverse()
+        .forEach((item, index) => {
+          const li = document.createElement("li");
+          li.innerHTML = `${item.ten} - ${item.tien.toLocaleString()} VND - ${item.ngay} 
+            <button onclick="xoaChiTieu(${danhSachChi.length - 1 - index})">Xóa</button>`;
+          ul.appendChild(li);
+        });
+      capNhatTongChi();
+    }
+
+    function themChiTieu() {
+      const ten = document.getElementById("tenKhoanChi").value;
+      const tien = Number(document.getElementById("soTien").value);
+      const ngay = document.getElementById("ngayChi").value || new Date().toISOString().split("T")[0];
+
+      if (ten && tien) {
+        danhSachChi.push({ ten, tien, ngay });
+        localStorage.setItem("chiTieu", JSON.stringify(danhSachChi));
+        hienThiDanhSach();
+        document.getElementById("tenKhoanChi").value = "";
+        document.getElementById("soTien").value = "";
+      }
+    }
+
+    function xoaChiTieu(index) {
+      if (confirm("Bạn có chắc muốn xóa khoản chi này không?")) {
+        danhSachChi.splice(index, 1);
+        localStorage.setItem("chiTieu", JSON.stringify(danhSachChi));
+        hienThiDanhSach();
+      }
+    }
+
+    hienThiDanhSach();
+  </script>
+</body>
+</html>
